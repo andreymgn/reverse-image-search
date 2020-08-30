@@ -1,4 +1,5 @@
 from typing import Optional, Callable, Any, List
+import pickle
 
 from vptree.node import VPTreeNode
 
@@ -44,3 +45,13 @@ class VPTree:
         if self.root is None:
             return []
         return self.root.get_nearest_neighbours(query, num_neighbours, max_results)
+
+
+def encode(tree: VPTree, path):
+    with open(path, 'wb') as f:
+        pickle.dump(tree, f)
+
+
+def decode(path) -> VPTree:
+    with open(path, 'rb') as f:
+        pickle.load(f)
