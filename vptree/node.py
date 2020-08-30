@@ -1,12 +1,16 @@
 import copy
 import random
+from typing import Optional, Any, List, Callable
 
 from vptree.priority_queue import PriorityQueue
 
 
 class VPTreeNode:
+    closer: Optional['VPTreeNode']
+    farther: Optional['VPTreeNode']
+    points: Optional[List[Any]]
 
-    def __init__(self, points, distance_fn, capacity=32):
+    def __init__(self, points: List[Any], distance_fn: Callable[[Any, Any], float], capacity=32):
         self.capacity = capacity
         self.distance_fn = distance_fn
         self.points = copy.deepcopy(points)
@@ -14,21 +18,21 @@ class VPTreeNode:
         self.closer = None
         self.farther = None
         self.threshold = 0.0
-        self._anneal()
+        self.anneal()
 
-    def _anneal(self):
+    def anneal(self):
         if len(self.points) == 0:
             if self.closer.size() == 0 or self.farther.size() == 0:
-                self.points = copy.deepcopy(self.closer)
-                self.points += self.farther
+                self.points = copy.deepcopy(self.closer.points)
+                self.points += self.farther.points
 
                 self.closer = None
                 self.farther = None
 
-                self._anneal()
+                self.anneal()
             else:
-                self.closer._anneal()
-                self.farther._anneal()
+                self.closer.anneal()
+                self.farther.anneal()
         elif len(self.points) > self.capacity:
             self._partition_points()
 
@@ -65,7 +69,7 @@ class VPTreeNode:
             except ValueError:
                 return False
 
-    def _get_child_for_point(self, point):
+    def _get_child_for_point(self, point) -> 'VPTreeNode':
         if self.distance_fn(self.vantage_point, point) > self.threshold:
             return self.farther
         return self.closer
@@ -131,7 +135,7 @@ class VPTreeNode:
 
         return None
 
-    def get_nearest_neighbours(self, point, num_neighbours, max_results=16):
+    def get_nearest_neighbours(self, point, num_neighbours, max_results):
         heap = PriorityQueue(point, self.distance_fn, max_results)
         self._get_nearest_neighbours(heap, point, num_neighbours, max_results)
 

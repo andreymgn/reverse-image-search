@@ -77,9 +77,8 @@ class TestVPTreeNode(unittest.TestCase):
         max_distance = NODE_CAPACITY // 8
         for node in nodes:
             res = node.get_within_distance(query, max_distance)
-            print(res)
             self.assertEqual(2 * max_distance + 1, len(res))
-            for i in range(query-max_distance, query+max_distance+1):
+            for i in range(query - max_distance, query + max_distance + 1):
                 self.assertIn(i, res)
 
 
