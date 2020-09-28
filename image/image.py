@@ -1,5 +1,5 @@
-from PIL import Image as PILImage
 import numpy as np
+from PIL import Image as PILImage
 
 
 def _dhash(img: PILImage.Image):
@@ -21,3 +21,10 @@ class Image:
 
     def distance(self, other: 'Image'):
         return bin(self.hash ^ other.hash).count('1')
+
+    def __lt__(self, other: 'Image'):
+        return self.path < other.path
+
+
+def distance_fn(im1: Image, im2: Image):
+    return im1.distance(im2)

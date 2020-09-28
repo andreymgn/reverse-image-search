@@ -1,5 +1,5 @@
-from typing import Optional, Callable, Any, List
 import pickle
+from typing import Optional, Callable, Any, List
 
 from vptree.node import VPTreeNode
 
@@ -17,7 +17,7 @@ class VPTree:
             self.root = VPTreeNode(points, self.distance_fn, self.capacity)
             return
         for point in points:
-            self.add(point)
+            self.root.add(point)
         self.root.anneal()
 
     def add(self, point):
@@ -54,4 +54,4 @@ def encode(tree: VPTree, path):
 
 def decode(path) -> VPTree:
     with open(path, 'rb') as f:
-        pickle.load(f)
+        return pickle.load(f)
