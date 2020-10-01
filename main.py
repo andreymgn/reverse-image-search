@@ -21,10 +21,19 @@ parser_update.add_argument('--dir', default=os.curdir, help='directory to scan f
 parser_update.add_argument('--recursive', '-r', default=True, help='update recursively')
 parser_update.set_defaults(func=cli.commands.update)
 
+parser_search = subparsers.add_parser('search', help='search for similar images')
+parser_search.add_argument('query', metavar='query', help='query image')
+parser_search.add_argument('--max_distance', default=3)
+parser_search.set_defaults(func=cli.commands.search_by_distance)
+
+parser_nearest = subparsers.add_parser('nearest', help='get nearest images')
+parser_nearest.add_argument('query', metavar='query', help='query image')
+parser_nearest.add_argument('--max_results', default=16)
+parser_nearest.add_argument('--num_neighbours', default=3)
+parser_nearest.set_defaults(func=cli.commands.search_nearest)
+
 args = parser.parse_args()
 if 'func' in args:
-    print(args)
     args.func(args)
 else:
-    print(args)
     parser.print_usage()

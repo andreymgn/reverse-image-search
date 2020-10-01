@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 from db.db import DB, decode
 from image import image
@@ -33,18 +34,42 @@ def add(args):
     db = decode(args.db)
     img = image.Image(args.image)
     db.tree.add(img)
-    db.image_paths.add(args.image)
+    db.image_hashes.add(args.image)
     db.encode(args.db)
 
 
 def update(args):
     db = decode(args.db)
-    walkdir(args.dir, args.recursive, lambda path: update_func(path, db.tree, db.image_paths))
+    walkdir(args.dir, args.recursive, lambda path: update_func(path, db.tree, db.image_hashes))
     db.encode(args.db)
 
 
-def update_func(path, tree, files):
+def update_func(path, tree, files: Dict[str, int]):
     if path not in files:
         img = image.Image(path)
         tree.add(img)
-        files.add(path)
+        files[img.path] = img.hash
+
+
+def search_by_distance(args):
+    db = decode(args.db)
+    query = image.Image(args.query)
+    out = db.tree.get_within_distance(query, args.max_distance)
+    if len(out) == 0:
+        return
+    for img in out:
+        if os.path.abspath(args.query) == img.path:
+            continue
+        print('path {} distance: {}'.format(img.path, query.distance(img)))
+
+
+def search_nearest(args):
+    db = decode(args.db)
+    query = image.Image(args.query)
+    out = db.tree.get_nearest_neighbours(query, args.num_neighbours, args.max_results)
+    if len(out) == 0:
+        return
+    for img in out:
+        if os.path.abspath(args.query) == img.path:
+            continue
+        print('path {} distance: {}'.format(img.path, query.distance(img)))
