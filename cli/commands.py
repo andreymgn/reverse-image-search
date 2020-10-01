@@ -27,7 +27,7 @@ def init(args):
 def init_func(path, tree, files):
     img = image.Image(path)
     tree.add(img)
-    files.append(path)
+    files.append(img)
 
 
 def add(args):
@@ -73,3 +73,15 @@ def search_nearest(args):
         if os.path.abspath(args.query) == img.path:
             continue
         print('path {} distance: {}'.format(img.path, query.distance(img)))
+
+
+def remove(args):
+    db = decode(args.db)
+    path = os.path.abspath(args.image)
+    img = image.Image(path)
+    if path in db.image_hashes:
+        if db.tree.remove(img):
+            del db.image_hashes[path]
+            db.encode(args.db)
+        else:
+            raise ValueError('path is in dict but not in tree')

@@ -25,6 +25,9 @@ class Image:
     def __lt__(self, other: 'Image'):
         return self.path < other.path
 
+    def __eq__(self, other):
+        return self.path == other.path and self.hash == other.hash
+
 
 def distance_fn(im1: Image, im2: Image):
     return im1.distance(im2)
