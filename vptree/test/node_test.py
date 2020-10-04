@@ -65,7 +65,6 @@ class TestVPTreeNode(unittest.TestCase):
         num_neighbours = 3
         for node in nodes:
             res = node.get_nearest_neighbours(query, num_neighbours, num_neighbours)
-            # print(res)
             self.assertEqual(len(res), num_neighbours)
             self.assertEqual(query, res[0])
             for v in [query - 1, query, query + 1]:
