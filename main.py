@@ -1,4 +1,5 @@
 import argparse
+import multiprocessing
 import os
 
 import cli.commands
@@ -46,6 +47,7 @@ parser_rebuild.set_defaults(func=cli.commands.rebuild)
 parser_clusters = subparsers.add_parser('clusters', help='show image clusters')
 parser_clusters.add_argument('--num_neighbours', default=3)
 parser_clusters.add_argument('--min_distance', default=2)
+parser_clusters.add_argument('--num_threads', default=multiprocessing.cpu_count(), type=int)
 parser_clusters.set_defaults(func=cli.commands.clusters)
 
 args = parser.parse_args()

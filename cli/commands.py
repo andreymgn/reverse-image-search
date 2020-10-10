@@ -1,5 +1,7 @@
+import functools
 import os
-from typing import Dict
+from multiprocessing import Pool as ThreadPool
+from typing import Dict, List, Callable
 
 from db.db import DB, decode
 from image import image
@@ -9,7 +11,7 @@ DEFAULT_HASH_TYPE = 'dhash'
 DEFAULT_HASH_SIZE = 8
 
 
-def walkdir(parent_dir, recursive, path_func):
+def walkdir(parent_dir: str, recursive: bool, path_func: Callable[[str], None]):
     for (dirpath, dirnames, filenames) in os.walk(parent_dir):
         for f in filenames:
             path = os.path.abspath(os.path.join(dirpath, f))
@@ -27,7 +29,7 @@ def init(args):
     db.encode(args.db)
 
 
-def init_func(path, tree, files, hash_type=DEFAULT_HASH_TYPE, hash_size=DEFAULT_HASH_SIZE):
+def init_func(path, tree: VPTree, files: List[image.Image], hash_type=DEFAULT_HASH_TYPE, hash_size=DEFAULT_HASH_SIZE):
     try:
         img = image.Image(path, hash_type, hash_size)
         tree.add(img)
@@ -51,7 +53,8 @@ def update(args):
     db.encode(args.db)
 
 
-def update_func(path, tree, files: Dict[str, int], hash_type=DEFAULT_HASH_TYPE, hash_size=DEFAULT_HASH_SIZE):
+def update_func(path: str, tree: VPTree, files: Dict[str, int], hash_type=DEFAULT_HASH_TYPE,
+                hash_size=DEFAULT_HASH_SIZE):
     if path not in files:
         try:
             img = image.Image(path, hash_type, hash_size)
@@ -119,17 +122,25 @@ def rebuild(args):
 
 def clusters(args):
     db = decode(args.db)
+    num_threads = args.num_threads
+
+    imgs = list(db.images)
+    batches = imgs
+    if num_threads > 1:
+        batches = _split(batches, num_threads)
+
+    pool = ThreadPool(num_threads)
+    batch_clusters = pool.map(functools.partial(_get_neighbours, db.tree, args.num_neighbours, args.min_distance),
+                              batches)
+    pool.close()
+    pool.join()
+
+    clusters_list = [item for sublist in batch_clusters for item in sublist]
+
     clusters = {}
-    for img in db.images:
-        neighbours = db.tree.get_nearest_neighbours(img, args.num_neighbours)
-        l = []
-        for n in neighbours:
-            dist = img.distance(n)
-            if n.path == img.path or dist > args.min_distance:
-                continue
-            l.append((n.path, dist))
-        if len(l) != 0:
-            clusters[img.path] = l
+    for i in range(0, len(imgs)):
+        if len(clusters_list[i]) != 0:
+            clusters[imgs[i].path] = clusters_list[i]
 
     for img_path, nearest in clusters.items():
         print('image: {}'.format(img_path))
@@ -137,3 +148,31 @@ def clusters(args):
         for n in nearest:
             print('\t{}\t{}'.format(n[0], n[1]))
         print()
+
+
+def _get_neighbours(tree: VPTree, num_neighbours: int, min_distance: int, img_batch: List[image.Image]):
+    result = []
+    for img in img_batch:
+        neighbours = tree.get_nearest_neighbours(img, num_neighbours)
+        l = []
+        for n in neighbours:
+            dist = img.distance(n)
+            if n.path == img.path or dist > min_distance:
+                continue
+            l.append((n.path, dist))
+
+        result.append(l)
+
+    return result
+
+
+def _split(seq: List, num_chunks: int):
+    avg = len(seq) / float(num_chunks)
+    out = []
+    last = 0.0
+
+    while last < len(seq):
+        out.append(seq[int(last):int(last + avg)])
+        last += avg
+
+    return out
