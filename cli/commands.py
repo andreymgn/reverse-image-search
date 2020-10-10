@@ -68,6 +68,7 @@ def search_by_distance(args):
     db = decode(args.db)
     query = image.Image(args.query, db.hash_type, db.hash_size)
     out = db.tree.get_within_distance(query, args.max_distance)
+
     if len(out) == 0:
         return
     for img in out:
@@ -80,6 +81,7 @@ def search_nearest(args):
     db = decode(args.db)
     query = image.Image(args.query, db.hash_type, db.hash_size)
     out = db.tree.get_nearest_neighbours(query, args.num_neighbours, args.max_results)
+
     if len(out) == 0:
         return
     for img in out:
@@ -92,6 +94,7 @@ def remove(args):
     db = decode(args.db)
     path = os.path.abspath(args.image)
     img = image.Image(path, db.hash_type, db.hash_size)
+
     if path in db.image_hashes:
         if db.tree.remove(img):
             del db.image_hashes[path]
@@ -102,18 +105,17 @@ def remove(args):
 
 def rebuild(args):
     db = decode(args.db)
-    hash_size = args.hash_size
-    if hash_size == 0:
-        hash_size = db.hash_size
-    hash_type = args.hash_type
-    if len(hash_type) == 0:
-        hash_type = db.hash_type
+    hash_size = args.hash_size if args.hash_size != 0 else db.hash_size
+    hash_type = args.hash_type if len(args.hash_type) != 0 else db.hash_type
+
     imgs = []
     files = []
+
     for path in db.image_hashes:
         img = image.Image(path, hash_type, hash_size)
         imgs.append(img)
         files.append(img)
+
     tree = VPTree(distance_fn=image.distance_fn)
     tree.add_list(imgs)
     db = DB(tree, files, hash_type, hash_size)
@@ -122,14 +124,11 @@ def rebuild(args):
 
 def clusters(args):
     db = decode(args.db)
-    num_threads = args.num_threads
 
     imgs = list(db.images)
-    batches = imgs
-    if num_threads > 1:
-        batches = _split(batches, num_threads)
+    batches = imgs if args.num_threads == 1 else _split(imgs, args.num_threads)
 
-    pool = ThreadPool(num_threads)
+    pool = ThreadPool(args.num_threads)
     batch_clusters = pool.map(functools.partial(_get_neighbours, db.tree, args.num_neighbours, args.min_distance),
                               batches)
     pool.close()
