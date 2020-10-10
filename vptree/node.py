@@ -21,7 +21,7 @@ class VPTreeNode:
         self.anneal()
 
     def anneal(self):
-        if len(self.points) == 0:
+        if self.points is None:
             if self.closer.size() == 0 or self.farther.size() == 0:
                 self.points = copy.deepcopy(self.closer.points)
                 self.points += self.farther.points
@@ -85,7 +85,7 @@ class VPTreeNode:
         else:
             sampled_points = copy.deepcopy(self.points)
         left = 0
-        right = len(self.points) - 1
+        right = len(sampled_points) - 1
         median_idx = len(sampled_points) // 2
         while left != right:
             pivot_idx = left + random.randint(0, right - left)
