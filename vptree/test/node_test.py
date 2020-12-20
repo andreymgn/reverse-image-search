@@ -1,4 +1,5 @@
 import unittest
+from typing import List
 
 from vptree.node import VPTreeNode
 
@@ -9,7 +10,7 @@ def dist_fn(x, y):
     return abs(x - y)
 
 
-def create_test_nodes():
+def create_test_nodes() -> List[VPTreeNode]:
     points = [i for i in range(NODE_CAPACITY)]
 
     test_nodes = [

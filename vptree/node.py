@@ -6,11 +6,15 @@ from vptree.priority_queue import PriorityQueue
 
 
 class VPTreeNode:
+    capacity: int
+    distance_fn: Callable[[Any, Any], float]
+    vantage_point: Any
+    threshold: float
     closer: Optional['VPTreeNode']
     farther: Optional['VPTreeNode']
     points: Optional[List[Any]]
 
-    def __init__(self, points: List[Any], distance_fn: Callable[[Any, Any], float], capacity=32):
+    def __init__(self, points: List[Any], distance_fn: Callable[[Any, Any], float], capacity: int = 32):
         self.capacity = capacity
         self.distance_fn = distance_fn
         self.points = copy.deepcopy(points)
@@ -36,7 +40,7 @@ class VPTreeNode:
         elif len(self.points) > self.capacity:
             self._partition_points()
 
-    def size(self):
+    def size(self) -> int:
         if self.points is None:
             return self.closer.size() + self.farther.size()
         return len(self.points)
@@ -53,13 +57,13 @@ class VPTreeNode:
             self.farther = VPTreeNode(self.points[partition_idx:], self.distance_fn, self.capacity)
             self.points = None
 
-    def add(self, point):
+    def add(self, point: Any):
         if self.points is None:
             self._get_child_for_point(point).add(point)
         else:
             self.points.append(point)
 
-    def remove(self, point):
+    def remove(self, point: Any):
         if self.points is None:
             return self._get_child_for_point(point).remove(point)
         else:
@@ -69,12 +73,12 @@ class VPTreeNode:
             except ValueError:
                 return False
 
-    def _get_child_for_point(self, point) -> 'VPTreeNode':
+    def _get_child_for_point(self, point: Any) -> 'VPTreeNode':
         if self.distance_fn(self.vantage_point, point) > self.threshold:
             return self.farther
         return self.closer
 
-    def contains(self, point):
+    def contains(self, point: Any):
         if self.points is None:
             return self._get_child_for_point(point).contains(point)
         return point in self.points
@@ -111,7 +115,7 @@ class VPTreeNode:
 
         return self.distance_fn(self.vantage_point, sampled_points[median_idx])
 
-    def _get_partition_idx(self):
+    def _get_partition_idx(self) -> Optional[int]:
         left = 0
         right = len(self.points) - 1
         while left <= right:
@@ -135,13 +139,13 @@ class VPTreeNode:
 
         return None
 
-    def get_nearest_neighbours(self, point, num_neighbours, max_results):
+    def get_nearest_neighbours(self, point: Any, num_neighbours: int, max_results: int) -> List[Any]:
         heap = PriorityQueue(point, self.distance_fn, max_results)
         self._get_nearest_neighbours(heap, point, num_neighbours, max_results)
 
         return heap.list()
 
-    def _get_nearest_neighbours(self, heap, point, num_neighbours, max_results):
+    def _get_nearest_neighbours(self, heap: PriorityQueue, point: Any, num_neighbours: int, max_results: int):
         if self.points is None:
             first_node = self._get_child_for_point(point)
             first_node._get_nearest_neighbours(heap, point, num_neighbours, max_results)
@@ -160,12 +164,12 @@ class VPTreeNode:
             for p in self.points:
                 heap.push(p)
 
-    def get_within_distance(self, point, max_distance):
+    def get_within_distance(self, point: Any, max_distance: float) -> List[Any]:
         result = []
         self._get_within_distance(result, point, max_distance)
         return result
 
-    def _get_within_distance(self, result, point, max_distance):
+    def _get_within_distance(self, result: List[Any], point: Any, max_distance: float):
         if self.points is None:
             distance_from_vantage_point_to_query_point = self.distance_fn(self.vantage_point, point)
 

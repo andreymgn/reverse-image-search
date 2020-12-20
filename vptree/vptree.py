@@ -4,9 +4,11 @@ from vptree.node import VPTreeNode
 
 
 class VPTree:
+    capacity: int
+    distance_fn: Callable[[Any, Any], float]
     root: Optional[VPTreeNode]
 
-    def __init__(self, distance_fn: Callable[[Any, Any], float], capacity=32):
+    def __init__(self, distance_fn: Callable[[Any, Any], float], capacity: int = 32):
         self.root = None
         self.distance_fn = distance_fn
         self.capacity = capacity
@@ -19,10 +21,10 @@ class VPTree:
             self.root.add(point)
         self.root.anneal()
 
-    def add(self, point):
+    def add(self, point: Any):
         self.add_list([point])
 
-    def remove(self, point):
+    def remove(self, point: Any):
         if self.root is None:
             return False
         removed = self.root.remove(point)
@@ -30,17 +32,17 @@ class VPTree:
             self.root.anneal()
         return removed
 
-    def contains(self, point):
+    def contains(self, point: Any):
         if self.root is None:
             return False
         return self.root.contains(point)
 
-    def get_within_distance(self, query, max_distance):
+    def get_within_distance(self, query: Any, max_distance: float):
         if self.root is None:
             return []
         return self.root.get_within_distance(query, max_distance)
 
-    def get_nearest_neighbours(self, query, num_neighbours, max_results=16):
+    def get_nearest_neighbours(self, query: Any, num_neighbours: int, max_results: int = 16):
         if self.root is None:
             return []
         return self.root.get_nearest_neighbours(query, num_neighbours, max_results)
