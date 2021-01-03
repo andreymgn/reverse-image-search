@@ -22,9 +22,9 @@ class VPTreeNode:
         self.closer = None
         self.farther = None
         self.threshold = 0.0
-        self.anneal()
+        self.partition()
 
-    def anneal(self):
+    def partition(self):
         if self.points is None:
             if self.closer.size() == 0 or self.farther.size() == 0:
                 self.points = copy.deepcopy(self.closer.points)
@@ -33,10 +33,10 @@ class VPTreeNode:
                 self.closer = None
                 self.farther = None
 
-                self.anneal()
+                self.partition()
             else:
-                self.closer.anneal()
-                self.farther.anneal()
+                self.closer.partition()
+                self.farther.partition()
         elif len(self.points) > self.capacity:
             self._partition_points()
 

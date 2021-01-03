@@ -19,7 +19,7 @@ class VPTree:
             return
         for point in points:
             self.root.add(point)
-        self.root.anneal()
+        self.root.partition()
 
     def add(self, point: Any):
         self.add_list([point])
@@ -29,7 +29,7 @@ class VPTree:
             return False
         removed = self.root.remove(point)
         if removed:
-            self.root.anneal()
+            self.root.partition()
         return removed
 
     def contains(self, point: Any):
