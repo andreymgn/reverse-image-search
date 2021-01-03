@@ -1,4 +1,3 @@
-# imdex
+# reverse-image-search
 
-imdex -- local image index.
-This project provides reverse image search on local files.
+Python package providing reverse image search on local files.

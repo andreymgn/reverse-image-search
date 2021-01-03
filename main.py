@@ -4,19 +4,19 @@ import os
 
 import cli.commands
 
-parser = argparse.ArgumentParser(description='imdex - local image index')
-parser.add_argument('--db', default='imdex.db')
+parser = argparse.ArgumentParser(description='reverse image search')
+parser.add_argument('--db', default='db.db')
 
 subparsers = parser.add_subparsers()
-parser_init = subparsers.add_parser('init', help='initialize imdex')
+parser_init = subparsers.add_parser('init', help='initialize database')
 parser_init.add_argument('--dir', default=os.curdir, help='directory to scan for images')
 parser_init.add_argument('--recursive', '-r', default=True, help='build recursively')
 parser_init.add_argument('--hash_type', default='dhash', type=str, help='hash type')
 parser_init.add_argument('--hash_size', default=8, type=int, help='hash size')
 parser_init.set_defaults(func=cli.commands.init)
 
-parser_add = subparsers.add_parser('add', help='add new image to imdex')
-parser_add.add_argument('image', metavar='image', help='path to image')
+parser_add = subparsers.add_parser('add', help='add new image to database')
+parser_add.add_argument('image', metavar='image', help='path to database')
 parser_add.set_defaults(func=cli.commands.add)
 
 parser_update = subparsers.add_parser('update', help='scan directory and add new images')
@@ -35,11 +35,11 @@ parser_nearest.add_argument('--max_results', default=16, type=int)
 parser_nearest.add_argument('--num_neighbours', default=3, type=int)
 parser_nearest.set_defaults(func=cli.commands.search_nearest)
 
-parser_remove = subparsers.add_parser('remove', help='remove image from imdex')
+parser_remove = subparsers.add_parser('remove', help='remove image from database')
 parser_remove.add_argument('image', metavar='image', help='path to image')
 parser_remove.set_defaults(func=cli.commands.remove)
 
-parser_rebuild = subparsers.add_parser('rebuild', help='rebuild imdex')
+parser_rebuild = subparsers.add_parser('rebuild', help='rebuild database')
 parser_rebuild.add_argument('--hash_type', default='', type=str, help='hash type')
 parser_rebuild.add_argument('--hash_size', default=0, type=int, help='hash size')
 parser_rebuild.set_defaults(func=cli.commands.rebuild)
