@@ -5,7 +5,7 @@ import os
 import cli.commands
 
 parser = argparse.ArgumentParser(description='reverse image search')
-parser.add_argument('--db', default='db.db')
+parser.add_argument('--db', help='path to database file', default='db.db')
 
 subparsers = parser.add_subparsers()
 parser_init = subparsers.add_parser('init', help='initialize database')
@@ -16,7 +16,7 @@ parser_init.add_argument('--hash_size', default=8, type=int, help='hash size')
 parser_init.set_defaults(func=cli.commands.init)
 
 parser_add = subparsers.add_parser('add', help='add new image to database')
-parser_add.add_argument('image', metavar='image', help='path to database')
+parser_add.add_argument('image', metavar='image', help='path to image')
 parser_add.set_defaults(func=cli.commands.add)
 
 parser_update = subparsers.add_parser('update', help='scan directory and add new images')
